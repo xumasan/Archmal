@@ -26,6 +26,7 @@ namespace Archmal
         client = new TcpClient();
         client.Connect(server, port);
         Console.WriteLine("client connected!!");
+        SendData("LOGIN:KumasanBot");
         NetworkStream stream = client.GetStream();
         Thread thread = new Thread(o => ReceiveData((TcpClient)o));
 
