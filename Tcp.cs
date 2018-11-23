@@ -3,6 +3,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -13,6 +14,7 @@ namespace Archmal
     static Position pos;
     static TcpClient client;
     static Color myTurn;
+    static bool inConnect;
 
     public Client(Position p)
     {
@@ -39,6 +41,9 @@ namespace Archmal
     static void ReceiveData(TcpClient client)
     {
         NetworkStream stream = client.GetStream();
+        Thread thread = new Thread(new ThreadStart(SendHeartBeat));
+        inConnect = true;
+        thread.Start();
 
         while (true)
         {
@@ -55,6 +60,9 @@ namespace Archmal
                 break;
             }
         }
+
+        inConnect = false;
+        thread.Join();
     }
 
     static void SendData(string msg)
@@ -62,6 +70,15 @@ namespace Archmal
         NetworkStream stream = client.GetStream();
         byte[] buffer = Encoding.UTF8.GetBytes(msg);
         stream.Write(buffer, 0, buffer.Length);
+    }
+
+    static void SendHeartBeat()
+    {
+        while (inConnect)
+        {
+            SendData("\n");
+            Thread.Sleep(30000);
+        }
     }
 
     static void HandleReceiveData(string str)
