@@ -370,13 +370,7 @@ namespace Archmal
                     kingPos[(int)sideToMove] = to;
                 }
             }
-            /*
-            Console.WriteLine(PrintPosition());
-            Console.WriteLine("Move is " + m.ToSfen());
-            Console.WriteLine("Cap is "  + capture);
-            Console.WriteLine("SquareIs(KingPos(Color.BLACK)) : " + SquareIs(KingPos(Color.BLACK)));
-            Console.WriteLine("SquareIs(KingPos(Color.WHITE)) : " + SquareIs(KingPos(Color.WHITE)));
-            */
+            
             Debug.Assert((Piece.Abs(capture) == Piece.BK) || SquareIs(KingPos(Color.BLACK)) == Piece.BK);
             Debug.Assert((Piece.Abs(capture) == Piece.BK) || SquareIs(KingPos(Color.WHITE)) == Piece.WK);
 
