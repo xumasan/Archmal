@@ -78,10 +78,6 @@ namespace Archmal
             else 
                 move += " ";
 
-            Console.WriteLine(warsFormat);
-            Console.WriteLine(move);
-            Console.ReadKey();
-
             return move;
         }
 
