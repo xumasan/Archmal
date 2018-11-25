@@ -123,7 +123,7 @@ namespace Archmal
     {
         Console.WriteLine("think start");
         string str = pos.SideToMove() == Color.BLACK ? "+" : "-";
-        str += Search.iteration(pos);
+        str += Search.Iteration(pos);
         Console.WriteLine("think end");
         return str;
     }

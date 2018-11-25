@@ -11,16 +11,14 @@ namespace Archmal
 
     public class Search {
 
-        static Move bestRootMove;
-
-        private static int search(Position pos, int alpha, int beta, int depth, int ply, bool pvNode)
+        private static int FullSearch(Position pos, int alpha, int beta, int depth, int ply, bool pvNode, List<Move> PV)
         {
             bool rootNode = pvNode && ply == 0;
             int bestValue = -Value.Infinite;
             int value = 0;
             int moveCount;
             int newPly = ply + 1;
-            Move bestMove;
+            var bestPV = new List<Move>();
 
             if (depth <= 0)
             {
@@ -35,6 +33,8 @@ namespace Archmal
 
             foreach (Move m in moves)
             {
+                List<Move> newPV = null;
+
                 int newDepth = depth - 1;
                 bool win = pos.DoMove(m);
 
@@ -43,31 +43,21 @@ namespace Archmal
                 if (win)
                 {
                     pos.UndoMove(m);
-                    if (rootNode)
-                        bestRootMove = m;
+                    PV.Add(m);
                     return Value.EvalInfinite;
                 }
                 
-                value = -search(pos, -beta, -alpha, newDepth, newPly, true);
+                value = -FullSearch(pos, -beta, -alpha, newDepth, newPly, true, newPV = new List<Move>{m});
 
                 pos.UndoMove(m);
-
-                if (rootNode)
-                {
-                     if (moveCount == 1 || value > alpha)
-                    {
-                        bestRootMove = m;
-                    }
-                }
 
                 if (value > bestValue)
                 {
                     bestValue = value;
+                    bestPV = newPV;
 
                     if (value > alpha)
                     {
-                        bestMove = m;
-
                         if (pvNode && value < beta) // alpha の更新
                             alpha = value;
                         else
@@ -79,15 +69,24 @@ namespace Archmal
                 }
             }
 
+            PV.AddRange(bestPV);
             return bestValue;
         }
 
-        public static string iteration(Position pos)
+        public static string Iteration(Position pos)
         {
-            int value = search(pos, -Value.Infinite, +Value.Infinite, 5, 0, true);
-            Console.WriteLine("best move is " + bestRootMove.ToSfen());
-            Console.WriteLine("value is " + value);
-            return bestRootMove.ToSfen();
+            var PV = new List<Move>();
+            for (int depth = 1; depth < 6; ++depth)
+            {
+                PV.Clear();
+                int value = FullSearch(pos, -Value.Infinite, +Value.Infinite, depth, 0, true, PV);
+                Console.WriteLine("info depth " + depth);
+                Console.WriteLine("best move is " + PV[0].ToSfen());
+                Console.Write("pv");
+				PV.ForEach(x => Console.Write(" " + x.ToSfen()));
+                Console.WriteLine("\nvalue is " + value);
+            }
+            return PV[0].ToSfen();
         }
     }
 }

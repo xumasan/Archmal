@@ -1,4 +1,4 @@
-﻿// #define LEARN
+﻿#define LEARN
 
 using System;
 
@@ -9,6 +9,8 @@ namespace Archmal
         static void Main(string[] args)
         {
 #if LEARN
+            Position pos = new Position();
+            Search.Iteration(pos);
 #else
             Int32 port;
             Int32.TryParse(args[1], out port);
