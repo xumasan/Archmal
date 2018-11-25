@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define LEARN
+
+using System;
 
 namespace Archmal
 {
@@ -6,8 +8,12 @@ namespace Archmal
     {
         static void Main(string[] args)
         {
+#if LEARN
+#else
             Int32 port;
             Int32.TryParse(args[1], out port);
+
+            Eval.Init();
 
             while(true)
             {
@@ -15,6 +21,7 @@ namespace Archmal
                 Client client = new Client(pos);
                 client.Start(args[0], port);
             }
+#endif
         }
     }
 }

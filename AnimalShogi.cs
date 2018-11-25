@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-
+using System.Diagnostics;
 /*
   0  1  2  3
   4  5  6  7
@@ -228,8 +228,8 @@ namespace Archmal
               square[i] = Piece.StartPos[i];
 
             sideToMove = Color.BLACK;
-            kingPos[Black] = (int)Square.SQ_22;
-            kingPos[White] = (int)Square.SQ_10;
+            kingPos[Black] = Square.SQ_22;
+            kingPos[White] = Square.SQ_10;
         }
 
         public string PrintPosition() {
@@ -364,7 +364,21 @@ namespace Archmal
                             stand[(int)sideToMove][Piece.BP]++;
                     }
                 }
+
+                if (Piece.Abs(fKind) == Piece.BK)
+                {
+                    kingPos[(int)sideToMove] = to;
+                }
             }
+            /*
+            Console.WriteLine(PrintPosition());
+            Console.WriteLine("Move is " + m.ToSfen());
+            Console.WriteLine("Cap is "  + capture);
+            Console.WriteLine("SquareIs(KingPos(Color.BLACK)) : " + SquareIs(KingPos(Color.BLACK)));
+            Console.WriteLine("SquareIs(KingPos(Color.WHITE)) : " + SquareIs(KingPos(Color.WHITE)));
+            */
+            Debug.Assert((Piece.Abs(capture) == Piece.BK) || SquareIs(KingPos(Color.BLACK)) == Piece.BK);
+            Debug.Assert((Piece.Abs(capture) == Piece.BK) || SquareIs(KingPos(Color.WHITE)) == Piece.WK);
 
             // 手番変更
             sideToMove = (sideToMove == Color.BLACK) ? Color.WHITE : Color.BLACK;
@@ -410,16 +424,23 @@ namespace Archmal
                         capKind -= Piece.PromoteBit;
                     stand[(int)sideToMove][capKind]--;
                 }
+                if (Piece.Abs(tKind) == Piece.BK)
+                {
+                    kingPos[(int)sideToMove] = from;
+                }
             }
+
+            Debug.Assert(SquareIs(KingPos(Color.BLACK)) == Piece.BK);
+            Debug.Assert(SquareIs(KingPos(Color.WHITE)) == Piece.WK);
         }
 
         public int Stand(Color color, int absKind)
 		{
 			return stand[(int)color][absKind];
 		}
-		public int KingPos(int color)
+		public Square KingPos(Color color)
 		{
-			return kingPos[color];
+			return kingPos[(int)color];
 		}
 
         public int SquareIs(Square sq)
@@ -436,8 +457,8 @@ namespace Archmal
         const int Black = (int)Color.BLACK, White = (int)Color.WHITE; // alias
         
         private int[] square = new int[SquareSize];
-		private int[] kingPos = new int[(int)Color.COLOR_NB];
 		private int[][] stand = new int[(int)Color.COLOR_NB][];
+        private Square[] kingPos = new Square[(int)Color.COLOR_NB];
         private Color sideToMove;
     } 
 }

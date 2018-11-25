@@ -24,7 +24,8 @@ namespace Archmal
 
             if (depth <= 0)
             {
-                return Eval.evaluate(pos);
+                return Eval.evaluate_kkpp(pos);
+                // return Eval.evaluate(pos);
             }
 
             GenerateMoves gm = new GenerateMoves(pos);

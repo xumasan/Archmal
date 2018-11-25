@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -63,9 +64,11 @@ namespace Archmal
         }
     }
 
-    public static class Eval
+    public static partial class Eval
     {
-        static int[,,,] KKPP = new int [12, 12, (int)EvalIndex.FE_END, (int)EvalIndex.FE_END];
+        const int FVScale = 32; 
+        static string EvalFilePath = @"./eval/KKPP.bin";
+        static Int32[,,,] KKPP = new Int32[12, 12, (int)EvalIndex.FE_END, (int)EvalIndex.FE_END];
 
         static int[] PieceValue = new int[]
         {
@@ -75,9 +78,22 @@ namespace Archmal
             -100, -200, -220, -15000, -400,
         };
 
-        public static List<int> MakeList(Position pos, ref int material)
+        public static void Init()
         {
-            var list = new List<int>(6);
+            using (var reader = new BinaryReader(File.OpenRead(EvalFilePath)))
+			{
+				Console.WriteLine("FV => " + EvalFilePath);
+				for (int i = 0; i < 12; ++i) 
+                    for (int j = 0; j < 12; ++j)
+                        for (int k = 0; k < (int)EvalIndex.FE_END; ++k) 
+                            for (int l = 0; l < (int)EvalIndex.FE_END; ++l) 
+                                KKPP[i, j, k, l] = reader.ReadInt32();
+			}
+        }
+
+        public static int[] MakeList(Position pos, ref int material)
+        {
+            var list = new int[6];
             int nlist = 0;
 
             for (Square sq = Square.SQ_09; sq <= Square.SQ_23; ++sq)
@@ -143,12 +159,11 @@ namespace Archmal
 
         public static int evaluate_kkpp(Position pos)
         {
-            int value = 0;
             int material = 0;
             int value_kkpp = 0;
 
-            int bk = EvalIndex.SquareToIndex(pos.KingPos((int)Color.BLACK));
-            int wk = EvalIndex.SquareToIndex(pos.KingPos((int)Color.WHITE));
+            int bk = EvalIndex.SquareToIndex(pos.KingPos(Color.BLACK));
+            int wk = EvalIndex.SquareToIndex(pos.KingPos(Color.WHITE));
 
             var list = MakeList(pos, ref material);
 
@@ -162,7 +177,7 @@ namespace Archmal
                 }
             }
 
-            value = value_kkpp + value;
+            int value = value_kkpp / FVScale + material;
 
             return pos.SideToMove() == Color.BLACK ? +value : -value;
         }
