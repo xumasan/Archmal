@@ -26,19 +26,27 @@ namespace Archmal
 				while ((s = reader.ReadLine()) != null)
 				{
                     var g = new Game();
+                    var pos = new Position();
                     string[] moves;
                     moves = s.Replace("\"", "").Split("	");
                     
                     for (int i = 0; i < moves.Count() - 1; ++i)
                     {
-                        g.moves.Add(new Move(WarsConverter(moves[i].Split(",")[0])));
+                        var m = new Move(WarsConverter(pos, moves[i].Split(",")[0]));
+                        if (!pos.IsLegalMove(m))
+                        {
+                            Console.WriteLine("Kif Data Contains Illegal Move.");
+                            break;
+                        }
+                        pos.DoMove(m);
+                        g.moves.Add(m);
                     }
                     games.Add(g);
 				}
 			}
         }
 
-        string WarsConverter(string warsFormat)
+        string WarsConverter(Position position, string warsFormat)
         {
             string RankChar  = " abcd";
             string fFile = warsFormat.Substring(1,1);
@@ -73,12 +81,17 @@ namespace Archmal
 
             move += tFile + RankChar[int.Parse(tRank)];
 
-            if (kind == "TO")
+            if ( kind == "TO" 
+              && Piece.Abs(position.SquareIs(MakeSquare(fFile, fRank))) == Piece.BP)
                 move += "+";
             else 
                 move += " ";
 
             return move;
+        }
+
+        Square MakeSquare(string file, string rank) {
+            return (Square)(4 * (int.Parse(rank) + 1) + (int.Parse(file) - 1));
         }
 
         public List<Game> games;
