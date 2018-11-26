@@ -6,10 +6,12 @@ namespace Archmal
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("ServerGC = " + System.Runtime.GCSettings.IsServerGC);
             Console.WriteLine("Usage: command [command options]");
 			Console.WriteLine("command:");
             Console.WriteLine("\tclient    -- client-mode");
             Console.WriteLine("\tlearn  -- [learnDepth][iterate] Bonanza Method");
+            Console.WriteLine();
 
             Eval.Init();
 
