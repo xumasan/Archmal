@@ -23,7 +23,6 @@ namespace Archmal
             if (depth <= 0)
             {
                 return Eval.Evaluate_kkpp(pos);
-                // return Eval.evaluate(pos);
             }
 
             GenerateMoves gm = new GenerateMoves(pos);

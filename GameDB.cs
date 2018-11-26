@@ -19,6 +19,7 @@ namespace Archmal
         const string FilePath = @"./db/kif.txt";
         public GameDB()
         {
+            Console.WriteLine("Start read DB");
             games = new List<Game>();
             using (var reader = new StreamReader(FilePath))
 			{
@@ -44,6 +45,7 @@ namespace Archmal
                     games.Add(g);
 				}
 			}
+            Console.WriteLine("Finish read DB");
         }
 
         string WarsConverter(Position position, string warsFormat)

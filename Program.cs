@@ -9,9 +9,10 @@ namespace Archmal
         static void Main(string[] args)
         {
 #if LEARN
-            // new Learn().LearnPhase1(3);
             Eval.Init();
-            Eval.LearnPhase2();
+            new Learn().LearnAll(3, 10);
+            //Position pos = new Position();
+            //Search.Iteration(pos);
 #else
             Int32 port;
             Int32.TryParse(args[1], out port);
