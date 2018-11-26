@@ -250,7 +250,7 @@ namespace Archmal
 
                 // 対局が終了　
                 pvStr.Add("0");
-				pvStr.ForEach(s => PVFile.WriteLine(s));
+				lock (PVFile) pvStr.ForEach(s => PVFile.WriteLine(s));
 				Console.Write((count++ * 1.0 / teacher.games.Count).ToString("P") + "\r");
             });
             Console.WriteLine("Error    = " + (error / total).ToString("f")); // calc J'
