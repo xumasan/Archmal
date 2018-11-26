@@ -38,8 +38,8 @@ namespace Archmal
                             Console.WriteLine("Kif Data Contains Illegal Move.");
                             break;
                         }
-                        pos.DoMove(m);
                         g.moves.Add(m);
+                        pos.DoMove(new Move(m.HashCode()));
                     }
                     games.Add(g);
 				}
