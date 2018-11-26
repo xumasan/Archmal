@@ -165,6 +165,11 @@ namespace Archmal
                 move += (1 << 11);
         }
 
+        public Move(int m)
+        {
+            move = m;
+        }
+
         public string ToSfen() {
             
             string str = String.Empty;
@@ -208,6 +213,11 @@ namespace Archmal
 
         public void AddCapture(int p) {
             move += (p << 12);
+        }
+
+        public int HashCode()
+        {
+            return move;
         }
 
         private int move;
@@ -370,7 +380,7 @@ namespace Archmal
                     kingPos[(int)sideToMove] = to;
                 }
             }
-            
+
             Debug.Assert((Piece.Abs(capture) == Piece.BK) || SquareIs(KingPos(Color.BLACK)) == Piece.BK);
             Debug.Assert((Piece.Abs(capture) == Piece.BK) || SquareIs(KingPos(Color.WHITE)) == Piece.WK);
 

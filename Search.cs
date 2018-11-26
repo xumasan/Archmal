@@ -11,7 +11,7 @@ namespace Archmal
 
     public class Search {
 
-        private static int FullSearch(Position pos, int alpha, int beta, int depth, int ply, bool pvNode, List<Move> PV)
+        public static int FullSearch(Position pos, int alpha, int beta, int depth, int ply, bool pvNode, List<Move> PV)
         {
             bool rootNode = pvNode && ply == 0;
             int bestValue = -Value.Infinite;

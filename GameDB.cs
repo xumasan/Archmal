@@ -81,6 +81,6 @@ namespace Archmal
             return move;
         }
 
-        List<Game> games;
+        public List<Game> games;
     }
 }
