@@ -59,5 +59,42 @@ namespace Archmal
 
             return moves;
         }
+
+        public List<Move> GenerateCaptureMoves() {
+
+            List<Square> empties = new List<Square>();
+            List<Move> moves = new List<Move>();
+            for (Square from = Square.SQ_09; from <= Square.SQ_23; ++from)
+            {
+                int piece = pos.SquareIs(from);
+                if (piece == Piece.Empty)
+                {
+                    empties.Add(from);
+                    continue;
+                }
+                if ( piece == Piece.Wall
+                  || Piece.ColorIs(piece) != pos.SideToMove())
+                  continue;
+                
+                foreach (int inc in Piece.Inc[piece])
+                {
+                  Square to = from + inc;
+                  int cap = pos.SquareIs(to);
+                  bool pro = false;
+
+                  if (  cap == Piece.Wall 
+                    ||  cap == Piece.Empty
+                    || (cap != Piece.Empty && Piece.ColorIs(cap) == pos.SideToMove()))
+                    continue;
+
+                  if (Piece.CanPromote(piece, to))
+                    pro = true;
+                  
+                  moves.Add(new Move(from, to, pro, false));
+                }
+            }
+
+            return moves;
+        }
     }
 }
