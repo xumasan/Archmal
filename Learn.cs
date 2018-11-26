@@ -60,7 +60,7 @@ namespace Archmal
 					if (postive != null)
 					{
 						CalcDeriv(pos, postive, negative);
-						pos.DoMove(postive[0]); // HACK
+						pos.DoMove(new Move(postive[0].HashCode())); // HACK
 					}
 					postive = new List<Move>();
 					negative = new List<List<Move>>();

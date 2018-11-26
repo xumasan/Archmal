@@ -9,7 +9,9 @@ namespace Archmal
         static void Main(string[] args)
         {
 #if LEARN
-            new Learn().LearnPhase1(3);
+            // new Learn().LearnPhase1(3);
+            Eval.Init();
+            Eval.LearnPhase2();
 #else
             Int32 port;
             Int32.TryParse(args[1], out port);

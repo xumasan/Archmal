@@ -356,7 +356,9 @@ namespace Archmal
 
             square[(int)to] = tKind;
 
-            m.AddCapture(capture);
+            // 2回書き込まないようにする
+            if (m.Capture() == 0)
+                m.AddCapture(capture);
             
             if (IsDrop(from))
             {
