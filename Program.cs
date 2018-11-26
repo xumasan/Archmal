@@ -16,7 +16,7 @@ namespace Archmal
             Eval.Init();
 
             var sub = Console.ReadLine().Split(' ');
-            if (sub[0] == "lean")
+            if (sub[0] == "learn")
             {
                 new Learn().LearnAll(int.Parse(sub[1]), int.Parse(sub[2]));
                 Position pos = new Position();
