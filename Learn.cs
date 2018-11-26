@@ -185,7 +185,7 @@ namespace Archmal
             var teacher = new GameDB();
             
             // 学習開始
-            foreach (var g in teacher.games)
+            Parallel.ForEach(teacher.games, g =>
             {
                 var pos = new Position();
                 var pvStr = new List<string>();
@@ -252,7 +252,7 @@ namespace Archmal
                 pvStr.Add("0");
 				pvStr.ForEach(s => PVFile.WriteLine(s));
 				Console.Write((count++ * 1.0 / teacher.games.Count).ToString("P") + "\r");
-            }
+            });
             Console.WriteLine("Error    = " + (error / total).ToString("f")); // calc J'
 			Console.WriteLine("Accuracy = " + (accuracyCount / total).ToString("p")); // calc accuracy
 			PVFile.Close();
