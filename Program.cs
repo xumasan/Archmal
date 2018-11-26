@@ -9,9 +9,7 @@ namespace Archmal
         static void Main(string[] args)
         {
 #if LEARN
-            GameDB db = new GameDB();
-            //Position pos = new Position();
-            //Search.Iteration(pos);
+            new Learn().LearnPhase1(3);
 #else
             Int32 port;
             Int32.TryParse(args[1], out port);

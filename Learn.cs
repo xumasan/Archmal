@@ -70,6 +70,14 @@ namespace Archmal
 
                 foreach (var positive in g.moves)
                 {
+                    // 違法手がある
+                    if (!pos.IsLegalMove(positive))
+                    {
+                        Console.WriteLine(pos.PrintPosition());
+                        Console.WriteLine("illegalMove is : " + positive.ToSfen());
+                    }
+                    Debug.Assert(pos.IsLegalMove(positive));
+
                     total++;
 					List<Move> bestPV;
                     pos.DoMove(positive);
