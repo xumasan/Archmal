@@ -131,7 +131,7 @@ namespace Archmal
             return list;
         }
 
-        public static int evaluate(Position pos)
+        public static int Evaluate(Position pos)
         {
             int value = 0;
 
@@ -157,7 +157,7 @@ namespace Archmal
             return pos.SideToMove() == Color.BLACK ? +value : -value;
         }
 
-        public static int evaluate_kkpp(Position pos)
+        public static int Evaluate_kkpp(Position pos)
         {
             int material = 0;
             int value_kkpp = 0;

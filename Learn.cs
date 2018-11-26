@@ -3,19 +3,141 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Archmal
 {
     public static partial class Eval
     {
         static string NewEvalFilePath = @"./eval/NEW_KKPP.bin";
-        
-        public static void Clear()
-        {
-            Array.Clear(KKPP, 0, 12 * 12 * (int)EvalIndex.FE_END * (int)EvalIndex.FE_END);
-        }
+        static double[,,,] pData;
+        public static void LearnPhase2()
+		{
+			pData = new double[12, 12, (int)EvalIndex.FE_END, (int)EvalIndex.FE_END];
+			for (int i = 0; i < 32; i++) // 32-iterate
+			{
+				Console.Write("renovate " + i + "steps\r");
+				Array.Clear(pData, 0, pData.Length);
+				Parallel.ForEach(PVFileParse1(), game => PVFileParse2(game));
+				RenovateParam();
+			}
+			FVFileCreate();
+			pData = null; // free
+		}
 
-        public static void FVFileCreate()
+		static IEnumerable<List<string>> PVFileParse1()
+		{
+			using (var reader = new StreamReader(@"./learn/TempPV"))
+			{
+				var game = new List<string>();
+				string s;
+				while ((s = reader.ReadLine()) != null)
+				{
+					if (s == "0") // end of game
+					{
+						yield return game;
+						game = new List<string>();
+					}
+					else game.Add(s);
+				}
+			}
+		}
+
+		static void PVFileParse2(List<string> game)
+		{
+			var pos = new Position();
+			List<Move> postive = null;
+			List<List<Move>> negative = null;
+
+			foreach (var sub in game)
+			{
+				var list = new List<int>();
+				foreach (var s in sub.Split(' ')) 
+                    list.Add(int.Parse(s));
+
+				if (list[0] == +1)
+				{
+					if (postive != null)
+					{
+						CalcDeriv(pos, postive, negative);
+						pos.DoMove(postive[0]); // HACK
+					}
+					postive = new List<Move>();
+					negative = new List<List<Move>>();
+					for (int i = 1; i < list.Count; i++) 
+                        postive.Add(new Move(list[i]));
+				}
+				else // list[0] == -1 => negative
+				{
+					var negaPV = new List<Move>();
+					for (int i = 1; i < list.Count; i++) 
+                        negaPV.Add(new Move(list[i]));
+					negative.Add(negaPV);
+				}
+			}
+		}
+		static void CalcDeriv(Position pos, List<Move> positive, List<List<Move>> negative)
+		{
+            Color pTurn = pos.SideToMove();
+            // 局面を進めて評価値を得る
+			foreach (var m in positive) pos.DoMove(m);
+			int bestVal = pTurn == pos.SideToMove() ? Evaluate_kkpp(pos) : -Evaluate_kkpp(pos);
+			foreach (var m in positive.Reverse<Move>()) pos.UndoMove(m);
+
+			double sumdT = 0.0;
+			foreach (var pv in negative)
+			{
+				foreach (var m in pv) pos.DoMove(m);
+				int val = pTurn == pos.SideToMove() ? Evaluate_kkpp(pos) : -Evaluate_kkpp(pos);
+				double dT = Learn.dSigmoid(val - bestVal);
+				IncParam(pos, -dT, pTurn);
+				foreach (var m in pv.Reverse<Move>()) pos.UndoMove(m);
+				sumdT += dT;
+			}
+			foreach (var m in positive) pos.DoMove(m);
+			IncParam(pos, +sumdT, pTurn);
+			foreach (var m in positive.Reverse<Move>()) pos.UndoMove(m);
+		}
+
+		static void IncParam(Position pos, double dinc, Color turn)
+		{
+			if (turn == Color.WHITE) dinc = -1 * dinc;
+
+			int dummy = 0;
+			int bk = EvalIndex.SquareToIndex(pos.KingPos(Color.BLACK));
+            int wk = EvalIndex.SquareToIndex(pos.KingPos(Color.WHITE));
+			var list = MakeList(pos, ref dummy);
+
+            for (int i = 0; i < EvalIndex.ListSize; ++i)
+            {
+                int k = list[i];
+                for (int j = 0; j < i; ++j)
+                {
+                    int l = list[j];
+                    pData[bk, wk, k, l] += dinc;
+                }
+            }
+		}
+
+        // 正規化
+		static void RenovateParam()
+		{
+			var random = new Random();
+			const double L1 = 0.010; // lasso  = was 1.00
+			for (int i = 0; i < 12; ++i) 
+                    for (int j = 0; j < 12; ++j)
+                        for (int k = 0; k < (int)EvalIndex.FE_END; ++k) 
+                            for (int l = 0; l < (int)EvalIndex.FE_END; ++l) 
+                            {
+                                int w = KKPP[i, j, k, l];
+                                int sign = Math.Sign(pData[i, j, k, l] - Math.Sign(w) * L1);
+                                KKPP[i, j, k, l] += sign * random.Next(0, FVScale / 8);
+
+                                if (w * KKPP[i, j, k, l] < 0) KKPP[i, j, k, l] = 0; // clipping
+                            }
+		}
+
+		static void FVFileCreate()
 		{
 			using (var write = new BinaryWriter(File.OpenWrite(NewEvalFilePath)))
 			{
@@ -41,11 +163,11 @@ namespace Archmal
 			{
 				Console.WriteLine(step + " step(s)");
 				LearnPhase1(learnDep); // pv create
-				// Evaluator.LearnPhase2(); // renovate weight
+				Eval.LearnPhase2(); // renovate weight
 				Console.WriteLine("finish " + DateTime.Now);
 				Console.WriteLine();
 			}
-			// LearnPhase1(learnDep, start, end); // J'&& Accuracy check
+			LearnPhase1(learnDep); // J'&& Accuracy check
 
 			Console.WriteLine("end time   " + DateTime.Now);
 			Console.WriteLine("total time " + time.Elapsed);
