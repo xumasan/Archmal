@@ -152,6 +152,8 @@ namespace Archmal
 
     public class Learn
     {
+        const int FVWindow = 256;
+
         public void LearnAll(int learnDep, int iterate)
         {
             var time = Stopwatch.StartNew();
@@ -220,7 +222,6 @@ namespace Archmal
                     bool positiveIsBest = true;
 					foreach (Move move in new GenerateMoves(pos).GenerateAllMoves().Where(m => m != positive))
 					{
-						const int FVWindow = 200;
 						int alpha = bestValue - FVWindow;
 						int beta = bestValue + FVWindow;
 
@@ -260,12 +261,18 @@ namespace Archmal
 
         public static double Sigmoid(double x)
 		{
-			return 1 / (1 + Math.Exp(-3 * x / 128)); // FVWindow = 200
+            double a = 7 / FVWindow;
+            double clipx = Math.Max(-FVWindow, Math.Min(FVWindow, x));
+			return 1 / (1 + Math.Exp(-a * clipx));
 		}
 
 		public static double dSigmoid(double x)
 		{
-			return Sigmoid(x) * (1 - Sigmoid(x)); // max => 0.25
+            if (x <= -FVWindow || FVWindow <= x)
+                return 0;
+                
+            double a = 7 / FVWindow;
+			return a * Sigmoid(x) * (1 - Sigmoid(x));
 		}
     }
 }
